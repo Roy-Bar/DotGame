@@ -1,6 +1,7 @@
 const mainDot = document.querySelector("#mainDot");
 const scorePanel = document.querySelector("#scorePanel h2");
 const newGameBtn = document.querySelector("#newGame");
+const pauseSpan = document.querySelector("#pauseSpan");
 
 const randomColor = function () {
   return Math.floor(Math.random() * 16777215).toString(16);
@@ -29,32 +30,43 @@ function getElementSize(elem) {
 }
 
 function moveMainDot(e) {
-  setTimeout(() => {
-    const moveSpeed = 40;
-    const mainDotPosition = getElementPosition(mainDot);
-    const x_pos = mainDotPosition["x_pos"];
-    const y_pos = mainDotPosition["y_pos"];
+  if (!isGamePaused) {
+    setTimeout(() => {
+      const moveSpeed = 40;
+      const mainDotPosition = getElementPosition(mainDot);
+      const x_pos = mainDotPosition["x_pos"];
+      const y_pos = mainDotPosition["y_pos"];
 
-    switch (e.code) {
-      case "ArrowUp":
-        mainDot.style.top = y_pos - moveSpeed + "px";
-        break;
-      case "ArrowRight":
-        mainDot.style.left = x_pos + moveSpeed + "px";
-        break;
-      case "ArrowDown":
-        mainDot.style.top = y_pos + moveSpeed + "px";
-        break;
-      case "ArrowLeft":
-        mainDot.style.left = x_pos - moveSpeed + "px";
-        break;
-      default:
-        break;
-    }
-  }, 40);
+      switch (e.code) {
+        case "ArrowUp":
+          mainDot.style.top = y_pos - moveSpeed + "px";
+          break;
+        case "ArrowRight":
+          mainDot.style.left = x_pos + moveSpeed + "px";
+          break;
+        case "ArrowDown":
+          mainDot.style.top = y_pos + moveSpeed + "px";
+          break;
+        case "ArrowLeft":
+          mainDot.style.left = x_pos - moveSpeed + "px";
+          break;
+        default:
+          break;
+      }
+    }, 40);
+  }
+}
+
+function pauseGame(e) {
+  if (e.code === "KeyP") {
+    isGamePaused = !isGamePaused;
+    console.log(`game paused: ${isGamePaused}`);
+    isGamePaused ? pauseSpan.style.display = "block" : pauseSpan.style.display = "none";
+  }
 }
 
 window.addEventListener("keydown", moveMainDot);
+window.addEventListener("keydown", pauseGame);
 
 function createCoinElement() {
   const coin = document.createElement("div");
@@ -147,6 +159,7 @@ let countTotalCoins = 0;
 let countTotalMines = 0;
 let countScore = 0;
 let deg = 0;
+let isGamePaused = false;
 const coinsArray = new Array();
 const minesArray = new Array();
 
@@ -159,7 +172,7 @@ function gameLoop() {
 }
 
 function createCoins() {
-  if (countTotalCoins < 20) {
+  if (countTotalCoins < 20 && !isGamePaused) {
     createCoinElement();
     countTotalCoins++;
   }
@@ -169,7 +182,7 @@ function createCoins() {
 }
 
 function createMines() {
-  if (countScore >= 10 && countTotalMines <= 5) {
+  if (countScore >= 10 && countTotalMines < 5 && !isGamePaused) {
     createMineElement();
     countTotalMines++;
   }
@@ -189,12 +202,14 @@ function rotateMines() {
 }
 
 function moveMines() {
-  let i = 0;
-  for (const mine of minesArray) {
-    setTimeout(() => {
-      mine.style.top = randomYpos() + "px";
-      mine.style.left = randomXpos() + "px";
-    }, 1000 + (i++ * 1000));
+  if (!isGamePaused) {
+    let i = 0;
+    for (const mine of minesArray) {
+      setTimeout(() => {
+        mine.style.top = randomYpos() + "px";
+        mine.style.left = randomXpos() + "px";
+      }, 1000 + i++ * 1000);
+    }
   }
 }
 
