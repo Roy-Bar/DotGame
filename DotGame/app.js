@@ -150,6 +150,7 @@ function gameLoop() {
   updateCoinsStatus();
   rotateMines();
   updateMinesStatus();
+  // moveMines();
   scorePanel.innerText = `Score: ${countScore}`;
 }
 
@@ -176,15 +177,27 @@ function createMines() {
 function rotateMines() {
   if (minesArray.length > 0) {
     deg += 10;
+    deg %= 360;
     for (mine of minesArray) {
       mine.style.transform = `rotate(${deg}deg)`;
     }
   }
 }
 
+function moveMines() {
+  let i = 0;
+  for (const mine of minesArray) {
+    setTimeout(() => {
+      mine.style.top = randomYpos() + "px";
+      mine.style.left = randomXpos() + "px";
+    }, 1000 + (i++ * 1000));
+  }
+}
+
 setInterval(gameLoop, 100);
 setTimeout(createCoins, 2000);
 setTimeout(createMines, 2000);
+setInterval(moveMines, 2000);
 
 newGameBtn.addEventListener("click", () => {
   console.log("new game clicked");
