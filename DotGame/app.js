@@ -22,38 +22,41 @@ function getElementPosition(elem) {
 }
 
 function getElementSize(elem) {
-    const height = parseInt(getComputedStyle(elem).height);
-    const width = parseInt(getComputedStyle(elem).width);
-  
-    return { height: height, width: width };
-  }
+  const height = parseInt(getComputedStyle(elem).height);
+  const width = parseInt(getComputedStyle(elem).width);
 
-window.addEventListener("keydown", (e) => {
-  console.log(e.code);
-  const moveSpeed = 20;
-  const mainDotPosition = getElementPosition(mainDot);
-  const x_pos = mainDotPosition["x_pos"];
-  const y_pos = mainDotPosition["y_pos"];
+  return { height: height, width: width };
+}
 
-  switch (e.code) {
-    case "ArrowUp":
-      mainDot.style.top = y_pos - moveSpeed + "px";
-      break;
-    case "ArrowRight":
-      mainDot.style.left = x_pos + moveSpeed + "px";
-      break;
-    case "ArrowDown":
-      mainDot.style.top = y_pos + moveSpeed + "px";
-      break;
-    case "ArrowLeft":
-      mainDot.style.left = x_pos - moveSpeed + "px";
-      break;
-    default:
-      break;
-  }
-});
+function moveMainDot(e) {
+  setTimeout(() => {
+    const moveSpeed = 40;
+    const mainDotPosition = getElementPosition(mainDot);
+    const x_pos = mainDotPosition["x_pos"];
+    const y_pos = mainDotPosition["y_pos"];
 
-function createCoin() {
+    switch (e.code) {
+      case "ArrowUp":
+        mainDot.style.top = y_pos - moveSpeed + "px";
+        break;
+      case "ArrowRight":
+        mainDot.style.left = x_pos + moveSpeed + "px";
+        break;
+      case "ArrowDown":
+        mainDot.style.top = y_pos + moveSpeed + "px";
+        break;
+      case "ArrowLeft":
+        mainDot.style.left = x_pos - moveSpeed + "px";
+        break;
+      default:
+        break;
+    }
+  }, 40);
+}
+
+window.addEventListener("keydown", moveMainDot);
+
+function createCoinElement() {
   const coin = document.createElement("div");
   coin.classList.add("coins");
   coin.style.backgroundColor = "#" + randomColor();
@@ -63,12 +66,26 @@ function createCoin() {
   coinsArray.push(coin);
 }
 
-function increaseMainDot() {
-    mainDot.style.height = (getElementSize(mainDot).height + 5) + 'px';
-    mainDot.style.width = (getElementSize(mainDot).width + 5) + 'px';
+function createMineElement() {
+  const mine = document.createElement("div");
+  mine.classList.add("mines");
+  mine.style.top = randomYpos() + "px";
+  mine.style.left = randomXpos() + "px";
+  document.body.appendChild(mine);
+  minesArray.push(mine);
 }
 
-function updateCurrentStatus() {
+function increaseMainDot() {
+  mainDot.style.height = getElementSize(mainDot).height + 5 + "px";
+  mainDot.style.width = getElementSize(mainDot).width + 5 + "px";
+}
+
+function decreaseMainDot() {
+  mainDot.style.height = getElementSize(mainDot).height - 5 + "px";
+  mainDot.style.width = getElementSize(mainDot).width - 5 + "px";
+}
+
+function updateCoinsStatus() {
   const eatenCoins = coinsArray.filter((coin) => {
     coinPos = getElementPosition(coin);
     mainDotPos = getElementPosition(mainDot);
@@ -93,26 +110,83 @@ function updateCurrentStatus() {
   }
 }
 
+function updateMinesStatus() {
+  const stepedMines = minesArray.filter((mine) => {
+    minePos = getElementPosition(mine);
+    mainDotPos = getElementPosition(mainDot);
+
+    /* if coin is eaten */
+    if (
+      minePos["x_pos"] >= mainDotPos["x_pos"] &&
+      minePos["y_pos"] >= mainDotPos["y_pos"] &&
+      minePos["x_pos"] <= mainDotPos["x_pos"] + getElementSize(mainDot).width &&
+      minePos["y_pos"] <= mainDotPos["y_pos"] + getElementSize(mainDot).height
+    ) {
+      decreaseMainDot();
+      let prevColor = mainDot.style.backgroundColor;
+      mainDot.style.backgroundColor = "red";
+      setTimeout(() => {
+        mainDot.style.backgroundColor = prevColor;
+      }, 400);
+      return mine;
+    }
+  });
+
+  for (mine of stepedMines) {
+    mine.remove();
+    countTotalMines--;
+    countScore--;
+  }
+}
+
 let countTotalCoins = 0;
+let countTotalMines = 0;
 let countScore = 0;
+let deg = 0;
 const coinsArray = new Array();
+const minesArray = new Array();
 
 function gameLoop() {
-
-  updateCurrentStatus();
+  updateCoinsStatus();
+  rotateMines();
+  updateMinesStatus();
   scorePanel.innerText = `Score: ${countScore}`;
 }
 
-setInterval(gameLoop, 100);
-
-setInterval(() => {
+function createCoins() {
   if (countTotalCoins < 20) {
-    createCoin();
+    createCoinElement();
     countTotalCoins++;
   }
-}, 2000);
+
+  const timer = 2000 - countScore * 20;
+  timer >= 800 ? setTimeout(createCoins, timer) : setTimeout(createCoins, 800);
+}
+
+function createMines() {
+  if (countScore >= 10 && countTotalMines <= 5) {
+    createMineElement();
+    countTotalMines++;
+  }
+
+  const timer = 2000 - countScore * 20;
+  timer >= 800 ? setTimeout(createMines, timer) : setTimeout(createMines, 800);
+}
+
+function rotateMines() {
+  if (minesArray.length > 0) {
+    deg += 10;
+    for (mine of minesArray) {
+      mine.style.transform = `rotate(${deg}deg)`;
+    }
+  }
+}
+
+setInterval(gameLoop, 100);
+setTimeout(createCoins, 2000);
+setTimeout(createMines, 2000);
 
 newGameBtn.addEventListener("click", () => {
-    console.log("new game clicked");
-    location.reload();
-})
+  console.log("new game clicked");
+  location.reload();
+});
