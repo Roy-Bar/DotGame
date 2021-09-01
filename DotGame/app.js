@@ -76,13 +76,15 @@ function createMineElement() {
 }
 
 function increaseMainDot() {
-  mainDot.style.height = getElementSize(mainDot).height + 5 + "px";
-  mainDot.style.width = getElementSize(mainDot).width + 5 + "px";
+  const sizeGain = 5;
+  mainDot.style.height = getElementSize(mainDot).height + sizeGain + "px";
+  mainDot.style.width = getElementSize(mainDot).width + sizeGain + "px";
 }
 
 function decreaseMainDot() {
-  mainDot.style.height = getElementSize(mainDot).height - 7 + "px";
-  mainDot.style.width = getElementSize(mainDot).width - 7 + "px";
+  const sizeDamage = 7;
+  mainDot.style.height = getElementSize(mainDot).height - sizeDamage + "px";
+  mainDot.style.width = getElementSize(mainDot).width - sizeDamage + "px";
 }
 
 function updateCoinsStatus() {
@@ -105,6 +107,7 @@ function updateCoinsStatus() {
 
   for (eatenCoin of eatenCoins) {
     eatenCoin.remove();
+    coinsArray.splice(coinsArray.indexOf(eatenCoin), 1);
     countTotalCoins--;
     countScore++;
   }
@@ -134,6 +137,7 @@ function updateMinesStatus() {
 
   for (mine of stepedMines) {
     mine.remove();
+    minesArray.splice(minesArray.indexOf(mine), 1);
     countTotalMines--;
     countScore -= 2;
   }
