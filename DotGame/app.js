@@ -81,8 +81,8 @@ function increaseMainDot() {
 }
 
 function decreaseMainDot() {
-  mainDot.style.height = getElementSize(mainDot).height - 5 + "px";
-  mainDot.style.width = getElementSize(mainDot).width - 5 + "px";
+  mainDot.style.height = getElementSize(mainDot).height - 7 + "px";
+  mainDot.style.width = getElementSize(mainDot).width - 7 + "px";
 }
 
 function updateCoinsStatus() {
@@ -127,7 +127,7 @@ function updateMinesStatus() {
       mainDot.style.backgroundColor = "red";
       setTimeout(() => {
         mainDot.style.backgroundColor = prevColor;
-      }, 400);
+      }, 500);
       return mine;
     }
   });
@@ -135,7 +135,7 @@ function updateMinesStatus() {
   for (mine of stepedMines) {
     mine.remove();
     countTotalMines--;
-    countScore--;
+    countScore -= 2;
   }
 }
 
